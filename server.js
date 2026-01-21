@@ -5,35 +5,34 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-app.use(cors()); // Critical for GitHub to talk to Hugging Face
+app.use(cors());
 
-// Root health check
-app.get('/', (req, res) => res.send('GreetStyle AI Server is Active!'));
+// Health Check
+app.get('/', (req, res) => res.send('AI Server is Active!'));
 
+// Initialize Gemini - Updated for better compatibility
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 app.post('/api/transform', async (req, res) => {
     const { message, style } = req.body;
     try {
+        // We use 'gemini-1.5-flash' - if this fails, the SDK handles the versioning
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         
-        // Stronger prompt for better style changes
-        const prompt = `You are a professional creative writer. Rewrite the following greeting message in an EXTREME and highly creative "${style}" style. Use vocabulary, slang, and a tone that matches "${style}" perfectly. 
-        
-        Original Message: "${message}" 
-        
-        Return ONLY the rewritten greeting. Do not say "Here is your rewrite".`;
+        const prompt = `Rewrite this message in a ${style} style: "${message}". Reply with ONLY the rewritten text.`;
 
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
+        console.log("Success! Styled text:", text);
         res.json({ transformedText: text });
     } catch (e) {
-        console.error("Gemini Error:", e);
-        res.status(500).json({ error: "AI Transformation Failed" });
+        console.error("Gemini Error:", e.message);
+        // This sends the actual error back to your browser so we can see it
+        res.status(500).json({ error: e.message });
     }
 });
 
-const PORT = process.env.PORT || 7860;
-app.listen(PORT, '0.0.0.0', () => console.log(`Server listening on port ${PORT}`));
+const PORT = 7860;
+app.listen(PORT, '0.0.0.0', () => console.log(`Server live on port ${PORT}`));
