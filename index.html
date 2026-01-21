@@ -28,8 +28,11 @@
 
         <div class="space-y-4">
             <p class="text-xs text-slate-400">2. Personalize & Send</p>
-            <input type="text" id="title" placeholder="Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
+            <input type="text" id="senderName" placeholder="Your Name (Sender)" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
+            
+            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
             <textarea id="message" placeholder="Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500"></textarea>
+            
             <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-500 transition">Create Short Link</button>
         </div>
 
@@ -45,7 +48,10 @@
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-400 mb-2"></div>
                 <p class="text-xs text-blue-400">AI Rewriting...</p>
             </div>
-            <h1 id="viewTitle" class="text-4xl font-black mb-4 uppercase"></h1>
+            
+            <h1 id="viewTitle" class="text-4xl font-black mb-1 uppercase text-white"></h1>
+            <p id="fromLabel" class="text-blue-400 font-bold tracking-widest text-sm mb-6 uppercase"></p>
+            
             <p id="viewMsg" class="text-xl italic text-slate-200 leading-relaxed"></p>
         </div>
 
@@ -65,18 +71,31 @@
     </div>
 
     <script>
-        const API_BASE = "https://yourusername-greetstyle-server.hf.space"; 
+        // UPDATE THIS WITH YOUR HUGGING FACE URL
+        const API_BASE = "https://chaicordero-greetstyle-ai.hf.space"; 
         let originalMsg = "";
 
+        // URL Routing
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('msg')) {
             document.getElementById('sender-page').style.display = 'none';
             document.getElementById('receiver-page').classList.remove('hidden');
-            const data = JSON.parse(LZString.decompressFromEncodedURIComponent(urlParams.get('msg')));
-            document.getElementById('viewTitle').innerText = data.t;
-            document.getElementById('viewMsg').innerText = data.m;
-            originalMsg = data.m;
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            
+            try {
+                const data = JSON.parse(LZString.decompressFromEncodedURIComponent(urlParams.get('msg')));
+                document.getElementById('viewTitle').innerText = data.t;
+                document.getElementById('viewMsg').innerText = data.m;
+                
+                // Set the "From" label
+                if (data.s) {
+                    document.getElementById('fromLabel').innerText = "From: " + data.s;
+                }
+                
+                originalMsg = data.m;
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            } catch(e) { 
+                document.getElementById('viewMsg').innerText = "Error loading message.";
+            }
         }
 
         function setTmp(t, m) {
@@ -86,9 +105,16 @@
 
         async function generateLink() {
             const btn = document.getElementById('genBtn');
-            btn.innerText = "⏳ Shortening...";
-            const data = { t: document.getElementById('title').value, m: document.getElementById('message').value };
+            const sender = document.getElementById('senderName').value || "Someone Special";
+            const title = document.getElementById('title').value || "A Greeting";
+            const message = document.getElementById('message').value || "Hello!";
+
+            btn.innerText = "⏳ Creating Link...";
+            
+            // 's' stands for sender in our compressed object
+            const data = { s: sender, t: title, m: message };
             const longUrl = window.location.origin + window.location.pathname + "?msg=" + LZString.compressToEncodedURIComponent(JSON.stringify(data));
+            
             try {
                 const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
                 document.getElementById('shareLink').innerText = await res.text();
@@ -114,15 +140,11 @@
                     body: JSON.stringify({ message: originalMsg, style: style })
                 });
                 const data = await res.json();
-                
-                // FIX: Check if the key exists before displaying
                 if (data.transformedText) {
                     document.getElementById('viewMsg').innerText = data.transformedText;
-                } else {
-                    document.getElementById('viewMsg').innerText = "AI could not rewrite this. Try again!";
                 }
             } catch (e) {
-                alert("Server Error. Ensure your Hugging Face Space is green 'Running'.");
+                alert("AI Server is asleep. Try again in a moment.");
             }
             document.getElementById('loader').classList.add('hidden');
         }
