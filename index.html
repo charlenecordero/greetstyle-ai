@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .tmp-btn { background: #1e293b; border: 1px solid #334155; padding: 12px; border-radius: 12px; font-size: 12px; transition: 0.2s; }
+        .tmp-btn { background: #1e293b; border: 1px solid #334155; padding: 12px; border-radius: 12px; font-size: 12px; cursor: pointer; }
         .tmp-btn:hover { background: #3b82f6; border-color: #60a5fa; }
     </style>
 </head>
@@ -17,8 +17,6 @@
 
     <div id="sender-page" class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-2xl border border-blue-500/20">
         <h1 class="text-3xl font-bold text-blue-400 mb-2">GreetStyle AI</h1>
-        <p class="text-slate-400 text-xs mb-4">1. Select a Template</p>
-        
         <div class="btn-grid">
             <button onclick="setTmp('🎂 Birthday', 'Hope your day is cake-filled!')" class="tmp-btn">🎂 Birthday</button>
             <button onclick="setTmp('❤️ Valentine', 'You are my favorite person!')" class="tmp-btn">❤️ Valentine</button>
@@ -27,12 +25,9 @@
         </div>
 
         <div class="space-y-4">
-            <p class="text-xs text-slate-400">2. Personalize & Send</p>
-            <input type="text" id="senderName" placeholder="Your Name (Sender)" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
-            
-            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
-            <textarea id="message" placeholder="Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500"></textarea>
-            
+            <input type="text" id="senderName" placeholder="Your Name (Sender)" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white">
+            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white">
+            <textarea id="message" placeholder="Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white"></textarea>
             <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-500 transition">Create Short Link</button>
         </div>
 
@@ -48,10 +43,8 @@
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-400 mb-2"></div>
                 <p class="text-xs text-blue-400">AI Rewriting...</p>
             </div>
-            
             <h1 id="viewTitle" class="text-4xl font-black mb-1 uppercase text-white"></h1>
             <p id="fromLabel" class="text-blue-400 font-bold tracking-widest text-sm mb-6 uppercase"></p>
-            
             <p id="viewMsg" class="text-xl italic text-slate-200 leading-relaxed"></p>
         </div>
 
@@ -71,31 +64,26 @@
     </div>
 
     <script>
-        // UPDATE THIS WITH YOUR HUGGING FACE URL
+        // CRITICAL: Use your DIRECT URL from "Embed this Space" -> "Direct URL"
+        // It must start with https:// and end WITHOUT a /
         const API_BASE = "https://chaicordero-greetstyle-ai.hf.space"; 
+        
         let originalMsg = "";
 
-        // URL Routing
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('msg')) {
             document.getElementById('sender-page').style.display = 'none';
             document.getElementById('receiver-page').classList.remove('hidden');
             
             try {
-                const data = JSON.parse(LZString.decompressFromEncodedURIComponent(urlParams.get('msg')));
-                document.getElementById('viewTitle').innerText = data.t;
-                document.getElementById('viewMsg').innerText = data.m;
-                
-                // Set the "From" label
-                if (data.s) {
-                    document.getElementById('fromLabel').innerText = "From: " + data.s;
-                }
-                
+                const raw = LZString.decompressFromEncodedURIComponent(urlParams.get('msg'));
+                const data = JSON.parse(raw);
+                document.getElementById('viewTitle').innerText = data.t || "Greeting";
+                document.getElementById('fromLabel').innerText = data.s ? "From: " + data.s : "";
+                document.getElementById('viewMsg').innerText = data.m || "";
                 originalMsg = data.m;
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            } catch(e) { 
-                document.getElementById('viewMsg').innerText = "Error loading message.";
-            }
+            } catch(e) { console.error("Link Error", e); }
         }
 
         function setTmp(t, m) {
@@ -105,22 +93,18 @@
 
         async function generateLink() {
             const btn = document.getElementById('genBtn');
-            const sender = document.getElementById('senderName').value || "Someone Special";
-            const title = document.getElementById('title').value || "A Greeting";
-            const message = document.getElementById('message').value || "Hello!";
+            const s = document.getElementById('senderName').value;
+            const t = document.getElementById('title').value;
+            const m = document.getElementById('message').value;
 
-            btn.innerText = "⏳ Creating Link...";
-            
-            // 's' stands for sender in our compressed object
-            const data = { s: sender, t: title, m: message };
+            btn.innerText = "⏳ Creating...";
+            const data = { s, t, m };
             const longUrl = window.location.origin + window.location.pathname + "?msg=" + LZString.compressToEncodedURIComponent(JSON.stringify(data));
             
             try {
                 const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
                 document.getElementById('shareLink').innerText = await res.text();
-            } catch (e) {
-                document.getElementById('shareLink').innerText = longUrl;
-            }
+            } catch (e) { document.getElementById('shareLink').innerText = longUrl; }
             document.getElementById('result').classList.remove('hidden');
             btn.innerText = "Create Short Link";
         }
@@ -133,18 +117,23 @@
         async function applyStyle(style) {
             if (style === 'original') { document.getElementById('viewMsg').innerText = originalMsg; return; }
             document.getElementById('loader').classList.remove('hidden');
+            
             try {
                 const res = await fetch(`${API_BASE}/api/transform`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: originalMsg, style: style })
                 });
+                
+                if (!res.ok) throw new Error('Server returned ' + res.status);
+                
                 const data = await res.json();
                 if (data.transformedText) {
                     document.getElementById('viewMsg').innerText = data.transformedText;
                 }
             } catch (e) {
-                alert("AI Server is asleep. Try again in a moment.");
+                console.error("Fetch Error:", e);
+                alert("Connection failed. Check your API_BASE link and ensure Gemini API key is correct.");
             }
             document.getElementById('loader').classList.add('hidden');
         }
