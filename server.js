@@ -13,7 +13,7 @@ app.post('/api/transform', async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     try {
-        // We call the STABLE v1 endpoint directly to avoid the 404 error
+        // DIRECT FETCH to bypass the SDK's v1beta bug
         const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
         
         const response = await fetch(url, {
@@ -21,28 +21,23 @@ app.post('/api/transform', async (req, res) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{
-                    parts: [{ text: `Rewrite this greeting in a ${style} style: "${message}". Reply with ONLY the rewritten text.` }]
+                    parts: [{ text: `Rewrite this message in an extreme ${style} style: "${message}". Reply with ONLY the rewritten text.` }]
                 }]
             })
         });
 
         const data = await response.json();
-
-        if (data.error) {
-            throw new Error(data.error.message);
-        }
-
-        // Extract text from the Google JSON structure
-        const transformedText = data.candidates[0].content.parts[0].text;
         
-        console.log("Success:", transformedText);
+        if (data.error) throw new Error(data.error.message);
+
+        const transformedText = data.candidates[0].content.parts[0].text;
         res.json({ transformedText: transformedText });
 
     } catch (e) {
-        console.error("Gemini Direct Error:", e.message);
+        console.error("Gemini Error:", e.message);
         res.status(500).json({ error: e.message });
     }
 });
 
 const PORT = 7860;
-app.listen(PORT, '0.0.0.0', () => console.log(`Server live on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server live on ${PORT}`));
