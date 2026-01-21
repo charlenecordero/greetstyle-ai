@@ -1,70 +1,32 @@
-/**
- * GreetStyle AI - Backend Server
- * Purpose: Handles AI text style transformations
- */
-
 const express = require('express');
-const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-
-// Middleware
-// We set a 10mb limit to handle the compressed image data sent in the request
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json());
 app.use(cors());
 
-// Initialize OpenAI
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-/**
- * AI Transform Endpoint
- * This takes the original message and rewrites it based on the selected theme.
- */
+app.get('/', (req, res) => res.send('AI Server Active'));
+
 app.post('/api/transform', async (req, res) => {
     const { message, style } = req.body;
-
-    if (!message || !style) {
-        return res.status(400).json({ error: "Message and style are required." });
-    }
-
     try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [
-                {
-                    role: "system",
-                    content: `You are a creative writing assistant. 
-                    Rewrite the user's message in a ${style} style. 
-                    - If style is 'short', make it very concise.
-                    - If style is 'long', expand it with beautiful details.
-                    - For 'pirate', 'gangsta', 'western', etc., use heavy characteristic slang.
-                    - Keep the core meaning and names the same.`
-                },
-                { role: "user", content: message }
-            ],
-            temperature: 0.8, // Slightly higher for more creative "themed" responses
-        });
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const prompt = `Rewrite this greeting: "${message}" in a ${style} style. Keep names the same. Reply with ONLY the rewritten text.`;
+        
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
 
-        res.json({ transformedText: response.choices[0].message.content });
-    } catch (error) {
-        console.error("OpenAI Error:", error);
-        res.status(500).json({ error: "The AI is currently resting. Please try again." });
+        // We send the result using the key 'transformedText'
+        res.json({ transformedText: text }); 
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: "AI Error" });
     }
 });
 
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`
-    ✅ GreetStyle AI Server is Running!
-    ----------------------------------
-    Local URL: http://localhost:${PORT}
-    Endpoint:  POST /api/transform
-    ----------------------------------
-    Press Ctrl+C to stop the server.
-    `);
-});
+const PORT = process.env.PORT || 7860;
+app.listen(PORT, '0.0.0.0', () => console.log(`Running on ${PORT}`));
