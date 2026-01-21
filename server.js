@@ -6,15 +6,15 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/', (req, res) => res.send('AI Server Direct-Link Active!'));
+app.get('/', (req, res) => res.send('AI Server 2.5 Active!'));
 
 app.post('/api/transform', async (req, res) => {
     const { message, style } = req.body;
     const apiKey = process.env.GEMINI_API_KEY;
 
     try {
-        // DIRECT FETCH to bypass the SDK's v1beta bug
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // UPDATED: Using the stable v1 endpoint with Gemini 2.5 Flash
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         
         const response = await fetch(url, {
             method: 'POST',
@@ -27,7 +27,6 @@ app.post('/api/transform', async (req, res) => {
         });
 
         const data = await response.json();
-        
         if (data.error) throw new Error(data.error.message);
 
         const transformedText = data.candidates[0].content.parts[0].text;
