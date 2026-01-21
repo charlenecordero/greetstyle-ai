@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .tmp-btn { background: #1e293b; border: 1px solid #334155; padding: 12px; border-radius: 12px; font-size: 12px; cursor: pointer; }
+        .tmp-btn { background: #1e293b; border: 1px solid #334155; padding: 12px; border-radius: 12px; font-size: 12px; cursor: pointer; color: white; }
         .tmp-btn:hover { background: #3b82f6; border-color: #60a5fa; }
     </style>
 </head>
@@ -25,14 +25,14 @@
         </div>
 
         <div class="space-y-4">
-            <input type="text" id="senderName" placeholder="Your Name (Sender)" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white">
-            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white">
-            <textarea id="message" placeholder="Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white"></textarea>
-            <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-500 transition">Create Short Link</button>
+            <input type="text" id="senderName" placeholder="Your Name (Sender)" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
+            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
+            <textarea id="message" placeholder="Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500"></textarea>
+            <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg">Create Short Link</button>
         </div>
 
         <div id="result" class="hidden mt-6 p-4 bg-black/40 rounded-xl border border-emerald-500/30">
-            <p id="shareLink" class="text-[10px] break-all font-mono mb-3 p-2 bg-slate-900 rounded"></p>
+            <div id="shareLink" class="text-[10px] break-all font-mono mb-3 p-2 bg-slate-900 rounded"></div>
             <button onclick="copyLink()" class="w-full bg-emerald-600 py-2 rounded-lg text-xs font-bold uppercase">Copy Link</button>
         </div>
     </div>
@@ -64,12 +64,15 @@
     </div>
 
     <script>
-        // CRITICAL: Use your DIRECT URL from "Embed this Space" -> "Direct URL"
-        // It must start with https:// and end WITHOUT a /
+        // --- IMPORTANT: PASTE YOUR DIRECT URL HERE ---
+        // 1. Go to Hugging Face Space
+        // 2. Click 3 dots (top right) -> Embed this Space
+        // 3. Copy ONLY the "Direct URL" (Ends in .hf.space)
         const API_BASE = "https://chaicordero-greetstyle-ai.hf.space"; 
         
         let originalMsg = "";
 
+        // Check if receiving a link
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('msg')) {
             document.getElementById('sender-page').style.display = 'none';
@@ -78,29 +81,29 @@
             try {
                 const raw = LZString.decompressFromEncodedURIComponent(urlParams.get('msg'));
                 const data = JSON.parse(raw);
-                document.getElementById('viewTitle').innerText = data.t || "Greeting";
+                document.getElementById('viewTitle').innerText = data.t || "";
                 document.getElementById('fromLabel').innerText = data.s ? "From: " + data.s : "";
                 document.getElementById('viewMsg').innerText = data.m || "";
                 originalMsg = data.m;
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            } catch(e) { console.error("Link Error", e); }
+            } catch(e) { console.error(e); }
         }
 
-        function setTmp(t, m) {
+        function setTmp(s, t, m) {
+            document.getElementById('senderName').value = t;
             document.getElementById('title').value = t;
             document.getElementById('message').value = m;
         }
 
         async function generateLink() {
             const btn = document.getElementById('genBtn');
-            const s = document.getElementById('senderName').value;
-            const t = document.getElementById('title').value;
-            const m = document.getElementById('message').value;
-
+            const data = { 
+                s: document.getElementById('senderName').value, 
+                t: document.getElementById('title').value, 
+                m: document.getElementById('message').value 
+            };
             btn.innerText = "⏳ Creating...";
-            const data = { s, t, m };
             const longUrl = window.location.origin + window.location.pathname + "?msg=" + LZString.compressToEncodedURIComponent(JSON.stringify(data));
-            
             try {
                 const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
                 document.getElementById('shareLink').innerText = await res.text();
@@ -111,7 +114,7 @@
 
         function copyLink() {
             navigator.clipboard.writeText(document.getElementById('shareLink').innerText);
-            alert("Copied!");
+            alert("Link Copied!");
         }
 
         async function applyStyle(style) {
@@ -119,24 +122,19 @@
             document.getElementById('loader').classList.remove('hidden');
             
             try {
-                const res = await fetch(`${API_BASE}/api/transform`, {
+                const response = await fetch(`${API_BASE}/api/transform`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: originalMsg, style: style })
                 });
-                
-                if (!res.ok) throw new Error('Server returned ' + res.status);
-                
-                const data = await res.json();
+
+                if (!response.ok) {
+                    const errDetail = await response.text();
+                    throw new Error(`Server Error: ${response.status} - ${errDetail}`);
+                }
+
+                const data = await response.json();
                 if (data.transformedText) {
                     document.getElementById('viewMsg').innerText = data.transformedText;
                 }
             } catch (e) {
-                console.error("Fetch Error:", e);
-                alert("Connection failed. Check your API_BASE link and ensure Gemini API key is correct.");
-            }
-            document.getElementById('loader').classList.add('hidden');
-        }
-    </script>
-</body>
-</html>
