@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreetStyle AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+
+    <div id="sender-page" class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-xl border border-blue-500/20">
+        <h1 class="text-3xl font-bold text-blue-400 mb-6">GreetStyle AI</h1>
+        <div class="space-y-4">
+            <input type="text" id="title" placeholder="Title (e.g. Happy B-Day!)"
+                class="w-full bg-slate-700 p-3 rounded-xl outline-none">
+            <textarea id="message" placeholder="Your message..." rows="3"
+                class="w-full bg-slate-700 p-3 rounded-xl outline-none"></textarea>
+            <label
+                class="block bg-slate-700 p-3 rounded-xl text-center cursor-pointer border border-dashed border-slate-500">
+                <span id="upload-text">🖼️ Add Photo</span>
+                <input type="file" id="image-input" accept="image/*" class="hidden" onchange="compressAndStore(this)">
+            </label>
+            <button onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold">Create Magic
+                Link</button>
+        </div>
+        <div id="result" class="hidden mt-6 p-4 bg-black/40 rounded-xl border border-emerald-500/30">
+            <p class="text-[10px] break-all font-mono mb-2" id="shareLink"></p>
+            <button onclick="copyLink()" class="w-full bg-emerald-600 py-2 rounded-lg text-xs font-bold">Copy
+                Link</button>
+        </div>
+    </div>
+
+    <div id="receiver-page" class="hidden max-w-2xl w-full">
+        <div id="card" class="bg-slate-800 rounded-3xl overflow-hidden shadow-2xl border border-slate-700">
+            <img id="viewImg" src="" class="w-full h-64 object-cover hidden">
+            <div class="p-8 text-center relative">
+                <div id="loader" class="hidden absolute inset-0 bg-slate-800/80 flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-400"></div>
+                </div>
+                <h1 id="viewTitle" class="text-4xl font-black mb-4"></h1>
+                <p id="viewMsg" class="text-xl italic text-slate-200"></p>
+            </div>
+        </div>
+        <div class="mt-6 grid grid-cols-3 gap-2">
+            <button onclick="applyStyle('pirate')"
+                class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-amber-700">Pirate</button>
+            <button onclick="applyStyle('gangsta')"
+                class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-gray-600">Gangsta</button>
+            <button onclick="applyStyle('poetry')"
+                class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-pink-700">Poetry</button>
+            <button onclick="applyStyle('fantasy')"
+                class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-indigo-700">Fantasy</button>
+            <button onclick="applyStyle('western')"
+                class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-orange-800">Western</button>
+            <button onclick="applyStyle('royalty')"
+                class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-yellow-700">Royalty</button>
+        </div>
+    </div>
+
+    <script>
+        // Replace this with your Live URL after deploying to Render/Localtunnel
+        const API_BASE = "http://localhost:3000";
+
+        let compressedImg = "";
+        let originalMsg = "";
+
+        // Check if we are receiving
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('msg')) {
+            document.getElementById('sender-page').classList.add('hidden');
+            document.getElementById('receiver-page').classList.remove('hidden');
+            const data = JSON.parse(LZString.decompressFromEncodedURIComponent(urlParams.get('msg')));
+
+            document.getElementById('viewTitle').innerText = data.t;
+            document.getElementById('viewMsg').innerText = data.m;
+            originalMsg = data.m;
+            if (data.i) {
+                const img = document.getElementById('viewImg');
+                img.src = data.i;
+                img.classList.remove('hidden');
+            }
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
+
+        function compressAndStore(input) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX = 300;
+                    const scale = MAX / Math.max(img.width, img.height);
+                    canvas.width = img.width * scale; canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    compressedImg = canvas.toDataURL('image/jpeg', 0.5);
+                    document.getElementById('upload-text').innerText = "✅ Added";
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        function generateLink() {
+            const data = { t: document.getElementById('title').value, m: document.getElementById('message').value, i: compressedImg };
+            const comp = LZString.compressToEncodedURIComponent(JSON.stringify(data));
+            const link = window.location.origin + window.location.pathname + "?msg=" + comp;
+            document.getElementById('shareLink').innerText = link;
+            document.getElementById('result').classList.remove('hidden');
+        }
+
+        function copyLink() {
+            navigator.clipboard.writeText(document.getElementById('shareLink').innerText);
+            alert("Link Copied!");
+        }
+
+        async function applyStyle(style) {
+            document.getElementById('loader').classList.remove('hidden');
+            const res = await fetch(`${API_BASE}/api/transform`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: originalMsg, style: style })
+            });
+            const data = await res.json();
+            document.getElementById('viewMsg').innerText = data.transformedText;
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>
