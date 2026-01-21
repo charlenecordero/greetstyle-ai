@@ -7,41 +7,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .tmp-btn { background: #1e293b; border: 1px solid #334155; padding: 12px; border-radius: 12px; font-size: 12px; cursor: pointer; color: white; }
-        .tmp-btn:hover { background: #3b82f6; border-color: #60a5fa; }
-    </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
 
     <div id="sender-page" class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-2xl border border-blue-500/20">
-        <h1 class="text-3xl font-bold text-blue-400 mb-2">GreetStyle AI</h1>
-        <div class="btn-grid">
-            <button onclick="setTmp('🎂 Birthday', 'Hope your day is cake-filled!')" class="tmp-btn">🎂 Birthday</button>
-            <button onclick="setTmp('❤️ Valentine', 'You are my favorite person!')" class="tmp-btn">❤️ Valentine</button>
-            <button onclick="setTmp('🎆 New Year', 'Happy 2026! Best year ever.')" class="tmp-btn">🎆 New Year</button>
-            <button onclick="setTmp('🎄 Christmas', 'Merry Christmas and Happy Holidays!')" class="tmp-btn">🎄 Christmas</button>
-        </div>
-
+        <h1 class="text-3xl font-bold text-blue-400 mb-6">GreetStyle AI</h1>
+        
         <div class="space-y-4">
-            <input type="text" id="senderName" placeholder="Your Name (Sender)" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
+            <div>
+                <label class="text-[10px] text-slate-400 uppercase font-bold ml-1">Your Name</label>
+                <input type="text" id="senderName" placeholder="Enter your name..." class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white">
+            </div>
+
+            <label class="text-[10px] text-slate-400 uppercase font-bold ml-1">Quick Templates</label>
+            <div class="grid grid-cols-2 gap-2">
+                <button onclick="setTmp('🎂 Birthday', 'Hope your day is cake-filled!')" class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-blue-600 border border-slate-600 transition">🎂 Birthday</button>
+                <button onclick="setTmp('❤️ Valentine', 'You are my favorite person!')" class="bg-slate-700 p-2 rounded-lg text-xs hover:bg-pink-600 border border-slate-600 transition">❤️ Valentine</button>
+            </div>
+
             <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
-            <textarea id="message" placeholder="Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500"></textarea>
-            <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg">Create Short Link</button>
+            <textarea id="message" placeholder="Your Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500"></textarea>
+            
+            <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-500">Generate Short Link</button>
         </div>
 
         <div id="result" class="hidden mt-6 p-4 bg-black/40 rounded-xl border border-emerald-500/30">
-            <div id="shareLink" class="text-[10px] break-all font-mono mb-3 p-2 bg-slate-900 rounded"></div>
+            <p id="shareLink" class="text-[10px] break-all font-mono mb-3 p-2 bg-slate-900 rounded"></p>
             <button onclick="copyLink()" class="w-full bg-emerald-600 py-2 rounded-lg text-xs font-bold uppercase">Copy Link</button>
         </div>
     </div>
 
     <div id="receiver-page" class="hidden max-w-2xl w-full">
         <div class="bg-slate-800 rounded-3xl p-10 text-center relative border border-slate-700 shadow-2xl">
-            <div id="loader" class="hidden absolute inset-0 bg-slate-800/90 flex flex-col items-center justify-center z-10 rounded-3xl">
+            <div id="loader" class="hidden absolute inset-0 bg-slate-800/95 flex flex-col items-center justify-center z-10 rounded-3xl">
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-400 mb-2"></div>
-                <p class="text-xs text-blue-400">AI Rewriting...</p>
+                <p class="text-xs text-blue-400">AI Stylizing...</p>
             </div>
             <h1 id="viewTitle" class="text-4xl font-black mb-1 uppercase text-white"></h1>
             <p id="fromLabel" class="text-blue-400 font-bold tracking-widest text-sm mb-6 uppercase"></p>
@@ -50,47 +50,38 @@
 
         <div class="mt-6 p-6 bg-slate-800/50 rounded-2xl border border-slate-700">
             <div class="grid grid-cols-3 gap-2">
-                <button onclick="applyStyle('original')" class="tmp-btn">Original</button>
-                <button onclick="applyStyle('pirate')" class="tmp-btn">Pirate</button>
-                <button onclick="applyStyle('poetry')" class="tmp-btn">Poetry</button>
-                <button onclick="applyStyle('old money')" class="tmp-btn">Old Money</button>
-                <button onclick="applyStyle('royalty')" class="tmp-btn">Royalty</button>
-                <button onclick="applyStyle('gangsta')" class="tmp-btn">Gangsta</button>
-                <button onclick="applyStyle('sci-fi')" class="tmp-btn">Sci-Fi</button>
-                <button onclick="applyStyle('yoda')" class="tmp-btn">Yoda</button>
-                <button onclick="applyStyle('magical')" class="tmp-btn">Magical</button>
+                <button onclick="applyStyle('original')" class="bg-slate-700 p-2 rounded-lg text-xs">Original</button>
+                <button onclick="applyStyle('pirate')" class="bg-slate-700 p-2 rounded-lg text-xs">Pirate</button>
+                <button onclick="applyStyle('poetry')" class="bg-slate-700 p-2 rounded-lg text-xs">Poetry</button>
+                <button onclick="applyStyle('old money')" class="bg-slate-700 p-2 rounded-lg text-xs">Old Money</button>
+                <button onclick="applyStyle('royalty')" class="bg-slate-700 p-2 rounded-lg text-xs">Royalty</button>
+                <button onclick="applyStyle('gangsta')" class="bg-slate-700 p-2 rounded-lg text-xs">Gangsta</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- IMPORTANT: PASTE YOUR DIRECT URL HERE ---
-        // 1. Go to Hugging Face Space
-        // 2. Click 3 dots (top right) -> Embed this Space
-        // 3. Copy ONLY the "Direct URL" (Ends in .hf.space)
+        // 🚨 IMPORTANT: Use the Direct URL from Hugging Face -> Embed this Space -> Direct URL
         const API_BASE = "https://chaicordero-greetstyle-ai.hf.space"; 
         
         let originalMsg = "";
 
-        // Check if receiving a link
+        // Route Checker
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('msg')) {
             document.getElementById('sender-page').style.display = 'none';
             document.getElementById('receiver-page').classList.remove('hidden');
-            
             try {
-                const raw = LZString.decompressFromEncodedURIComponent(urlParams.get('msg'));
-                const data = JSON.parse(raw);
+                const data = JSON.parse(LZString.decompressFromEncodedURIComponent(urlParams.get('msg')));
                 document.getElementById('viewTitle').innerText = data.t || "";
                 document.getElementById('fromLabel').innerText = data.s ? "From: " + data.s : "";
                 document.getElementById('viewMsg').innerText = data.m || "";
                 originalMsg = data.m;
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            } catch(e) { console.error(e); }
+            } catch(e) { alert("Error loading link"); }
         }
 
-        function setTmp(s, t, m) {
-            document.getElementById('senderName').value = t;
+        function setTmp(t, m) {
             document.getElementById('title').value = t;
             document.getElementById('message').value = m;
         }
@@ -102,39 +93,40 @@
                 t: document.getElementById('title').value, 
                 m: document.getElementById('message').value 
             };
-            btn.innerText = "⏳ Creating...";
+            btn.innerText = "⏳ Shortening...";
             const longUrl = window.location.origin + window.location.pathname + "?msg=" + LZString.compressToEncodedURIComponent(JSON.stringify(data));
             try {
                 const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
                 document.getElementById('shareLink').innerText = await res.text();
             } catch (e) { document.getElementById('shareLink').innerText = longUrl; }
             document.getElementById('result').classList.remove('hidden');
-            btn.innerText = "Create Short Link";
+            btn.innerText = "Generate Short Link";
         }
 
         function copyLink() {
             navigator.clipboard.writeText(document.getElementById('shareLink').innerText);
-            alert("Link Copied!");
+            alert("Copied!");
         }
 
         async function applyStyle(style) {
             if (style === 'original') { document.getElementById('viewMsg').innerText = originalMsg; return; }
             document.getElementById('loader').classList.remove('hidden');
-            
             try {
+                // We add /api/transform to the base URL
                 const response = await fetch(`${API_BASE}/api/transform`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: originalMsg, style: style })
                 });
-
-                if (!response.ok) {
-                    const errDetail = await response.text();
-                    throw new Error(`Server Error: ${response.status} - ${errDetail}`);
-                }
-
                 const data = await response.json();
                 if (data.transformedText) {
                     document.getElementById('viewMsg').innerText = data.transformedText;
                 }
             } catch (e) {
+                alert("Server Error. Check your API_BASE URL and make sure the server has CORS enabled.");
+            }
+            document.getElementById('loader').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
