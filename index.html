@@ -12,162 +12,159 @@
 
     <div id="sender-page" class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-xl border border-blue-500/20">
         <h1 class="text-3xl font-bold text-blue-400 mb-2">GreetStyle AI</h1>
-        <p class="text-slate-400 text-xs mb-6">Create a card & share the magic link!</p>
+        <p class="text-slate-400 text-xs mb-6">Create a card & share the link!</p>
         
         <div class="space-y-4">
+            <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Quick Templates</p>
             <div class="flex flex-wrap gap-2 mb-4">
-                <button onclick="setTmp('🎂 Birthday', 'Wishing you a year full of joy, laughter, and endless cake!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-blue-600 transition">Birthday</button>
-                <button onclick="setTmp('❤️ Valentine', 'You make my world brighter. Happy Valentines Day!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-pink-600 transition">Valentines</button>
-                <button onclick="setTmp('🎆 New Year', 'Cheers to a fresh start and 365 days of new opportunities!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-emerald-600 transition">New Year</button>
-                <button onclick="setTmp('🎄 Christmas', 'May your holidays be merry, bright, and filled with love!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-red-600 transition">Christmas</button>
+                <button onclick="setTmp('🎂 Birthday', 'Wishing you a year full of joy, laughter, and endless cake!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-blue-600 border border-slate-600 transition">Birthday</button>
+                <button onclick="setTmp('❤️ Valentine', 'You make my world brighter. Happy Valentines Day!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-pink-600 border border-slate-600 transition">Valentines</button>
+                <button onclick="setTmp('🎆 New Year', 'Cheers to a fresh start and 365 days of new opportunities!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-emerald-600 border border-slate-600 transition">New Year</button>
+                <button onclick="setTmp('🎄 Christmas', 'May your holidays be merry, bright, and filled with love!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-red-600 border border-slate-600 transition">Christmas</button>
+                <button onclick="setTmp('🎓 Graduation', 'The hard work paid off! So proud of your achievement!')" class="bg-slate-700 px-3 py-1 rounded-full text-[10px] hover:bg-orange-600 border border-slate-600 transition">Graduation</button>
             </div>
 
-            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl outline-none border border-slate-600">
-            <textarea id="message" placeholder="Type your message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl outline-none border border-slate-600"></textarea>
+            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl outline-none border border-slate-600 focus:border-blue-500">
+            <textarea id="message" placeholder="Type your message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl outline-none border border-slate-600 focus:border-blue-500"></textarea>
             
             <label class="block bg-slate-700 p-3 rounded-xl text-center cursor-pointer border border-dashed border-slate-500 hover:bg-slate-600">
                 <span id="upload-text">🖼️ Add a Photo</span>
                 <input type="file" id="image-input" accept="image/*" class="hidden" onchange="handleImage(this)">
             </label>
 
-            <button onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg shadow-blue-900/40 active:scale-95 transition">Generate Magic Link</button>
+            <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg shadow-blue-900/40 active:scale-95 transition">Generate Magic Link</button>
         </div>
 
-        <div id="result" class="hidden mt-6 p-4 bg-black/40 rounded-xl border border-emerald-500/30 animate-pulse">
-            <p class="text-[10px] text-emerald-400 font-bold mb-2">Link Created! Copy below:</p>
-            <div id="shareLink" class="text-[9px] break-all font-mono opacity-60 mb-3"></div>
+        <div id="result" class="hidden mt-6 p-4 bg-black/40 rounded-xl border border-emerald-500/30">
+            <p class="text-[10px] text-emerald-400 font-bold mb-2">Short Link Ready:</p>
+            <div id="shareLink" class="text-xs break-all font-mono text-white mb-3 bg-slate-900 p-2 rounded"></div>
             <button onclick="copyLink()" class="w-full bg-emerald-600 py-2 rounded-lg text-xs font-bold uppercase tracking-wider">Copy to Clipboard</button>
         </div>
     </div>
 
     <div id="receiver-page" class="hidden max-w-2xl w-full">
         <div id="card" class="bg-slate-800 rounded-3xl overflow-hidden shadow-2xl border border-slate-700">
-            <div id="img-container" class="hidden w-full h-64 bg-slate-700 overflow-hidden">
+            <div id="img-container" class="hidden w-full h-64 bg-slate-700">
                 <img id="viewImg" src="" class="w-full h-full object-cover">
             </div>
             <div class="p-8 text-center relative">
                 <div id="loader" class="hidden absolute inset-0 bg-slate-800/90 flex flex-col items-center justify-center z-10">
                     <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-400 mb-2"></div>
-                    <p class="text-[10px] text-blue-400 font-mono">AI Stylizing...</p>
+                    <p class="text-xs text-blue-400 font-mono">AI Stylizing...</p>
                 </div>
-                <h1 id="viewTitle" class="text-4xl font-black mb-4 text-white uppercase tracking-tight"></h1>
+                <h1 id="viewTitle" class="text-4xl font-black mb-4 text-white uppercase"></h1>
                 <p id="viewMsg" class="text-xl italic text-slate-200 leading-relaxed"></p>
             </div>
         </div>
 
         <div class="mt-6 p-4 bg-slate-800/50 rounded-2xl border border-slate-700">
-            <p class="text-center text-[10px] font-bold text-slate-500 uppercase mb-4">Change Reading Style</p>
             <div class="grid grid-cols-3 sm:grid-cols-4 gap-2">
                 <button onclick="applyStyle('original')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-slate-600">Original</button>
                 <button onclick="applyStyle('pirate')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-amber-700">Pirate</button>
                 <button onclick="applyStyle('poetry')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-pink-700">Poetry</button>
                 <button onclick="applyStyle('old money')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-emerald-800">Old Money</button>
                 <button onclick="applyStyle('royalty')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-purple-800">Royalty</button>
-                <button onclick="applyStyle('fantasy')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-indigo-800">Fantasy</button>
-                <button onclick="applyStyle('magical')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-cyan-700">Magical</button>
                 <button onclick="applyStyle('gangsta')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-zinc-700">Gangsta</button>
-                <button onclick="applyStyle('western')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-orange-800">Western</button>
                 <button onclick="applyStyle('sci-fi')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-teal-700">Sci-Fi</button>
-                <button onclick="applyStyle('shakespearian')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-rose-900">Shakespeare</button>
                 <button onclick="applyStyle('yoda')" class="bg-slate-700 p-2 rounded-lg text-[10px] hover:bg-green-800">Yoda</button>
             </div>
         </div>
     </div>
 
     <script>
-        // UPDATE THIS TO YOUR DIRECT HUGGING FACE URL
         const API_BASE = "https://yourusername-greetstyle-server.hf.space"; 
-        
         let compressedImg = "";
         let originalMsg = "";
 
-        // UI Routing: Check if URL has a message
+        // URL ROUTING: If 'msg' exists, show receiver page
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('msg')) {
             document.getElementById('sender-page').classList.add('hidden');
             document.getElementById('receiver-page').classList.remove('hidden');
             
-            try {
-                const data = JSON.parse(LZString.decompressFromEncodedURIComponent(urlParams.get('msg')));
-                document.getElementById('viewTitle').innerText = data.t;
-                document.getElementById('viewMsg').innerText = data.m;
-                originalMsg = data.m;
-                if (data.i) {
-                    document.getElementById('img-container').classList.remove('hidden');
-                    document.getElementById('viewImg').src = data.i;
-                }
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            } catch(e) { 
-                document.getElementById('viewMsg').innerText = "Error loading message. Link might be broken."; 
+            const rawData = LZString.decompressFromEncodedURIComponent(urlParams.get('msg'));
+            const data = JSON.parse(rawData);
+            
+            document.getElementById('viewTitle').innerText = data.t;
+            document.getElementById('viewMsg').innerText = data.m;
+            originalMsg = data.m;
+            if (data.i) {
+                document.getElementById('img-container').classList.remove('hidden');
+                document.getElementById('viewImg').src = data.i;
             }
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
 
-        // Helper: Template Suggestion
         function setTmp(t, m) {
             document.getElementById('title').value = t;
             document.getElementById('message').value = m;
         }
 
-        // Helper: Aggressive Image Compression for Tiny URLs
         function handleImage(input) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_SIZE = 120; // Aggressive shrink to prevent 400 error
-                    const scale = MAX_SIZE / Math.max(img.width, img.height);
+                    const MAX = 100; // Tiny thumbnail to keep URL short
+                    const scale = MAX / Math.max(img.width, img.height);
                     canvas.width = img.width * scale;
                     canvas.height = img.height * scale;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    // Use very low quality for short URL
-                    compressedImg = canvas.toDataURL('image/jpeg', 0.1); 
-                    document.getElementById('upload-text').innerText = "✅ Image Compressed";
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    compressedImg = canvas.toDataURL('image/jpeg', 0.2); 
+                    document.getElementById('upload-text').innerText = "✅ Added";
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(input.files[0]);
         }
 
-        function generateLink() {
+        async function generateLink() {
+            const btn = document.getElementById('genBtn');
+            btn.innerText = "⏳ Shortening Link...";
+            
             const data = {
-                t: document.getElementById('title').value || "A Message for You",
-                m: document.getElementById('message').value || "No message provided.",
+                t: document.getElementById('title').value || "Greeting",
+                m: document.getElementById('message').value || "Hello!",
                 i: compressedImg
             };
-            const comp = LZString.compressToEncodedURIComponent(JSON.stringify(data));
-            const finalUrl = window.location.origin + window.location.pathname + "?msg=" + comp;
             
-            document.getElementById('shareLink').innerText = finalUrl;
-            document.getElementById('result').classList.remove('hidden');
+            const longData = LZString.compressToEncodedURIComponent(JSON.stringify(data));
+            const longUrl = window.location.origin + window.location.pathname + "?msg=" + longData;
+
+            try {
+                // Using TinyURL's free public API to shorten your data link
+                const res = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+                const shortUrl = await res.text();
+                
+                document.getElementById('shareLink').innerText = shortUrl;
+                document.getElementById('result').classList.remove('hidden');
+            } catch (e) {
+                // Fallback if TinyURL fails
+                document.getElementById('shareLink').innerText = longUrl;
+                document.getElementById('result').classList.remove('hidden');
+            }
+            btn.innerText = "Generate Magic Link";
         }
 
         function copyLink() {
             navigator.clipboard.writeText(document.getElementById('shareLink').innerText);
-            alert("Copied to Clipboard!");
+            alert("Copied!");
         }
 
         async function applyStyle(style) {
-            if (style === 'original') {
-                document.getElementById('viewMsg').innerText = originalMsg;
-                return;
-            }
-            
+            if (style === 'original') { document.getElementById('viewMsg').innerText = originalMsg; return; }
             document.getElementById('loader').classList.remove('hidden');
             try {
-                const response = await fetch(`${API_BASE}/api/transform`, {
+                const res = await fetch(`${API_BASE}/api/transform`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: originalMsg, style: style })
                 });
-                const data = await response.json();
+                const data = await res.json();
                 document.getElementById('viewMsg').innerText = data.transformedText;
-            } catch (err) {
-                alert("AI Server is asleep. Make sure your Hugging Face Space is 'Running'.");
-            } finally {
-                document.getElementById('loader').classList.add('hidden');
-            }
+            } catch (e) { alert("AI Server error."); }
+            document.getElementById('loader').classList.add('hidden');
         }
     </script>
 </body>
