@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
+
 <body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4 font-sans">
 
     <div id="sender-page" class="max-w-md w-full bg-slate-800 p-8 rounded-3xl shadow-2xl border border-blue-500/20">
@@ -15,56 +17,84 @@
         <div class="space-y-4">
             <div>
                 <label class="text-[10px] text-slate-500 uppercase font-bold ml-1">Your Name</label>
-                <input type="text" id="senderName" placeholder="Enter your name..." class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white">
+                <input type="text" id="senderName" placeholder="Enter your name..."
+                    class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500 text-white">
             </div>
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="setTmp('🎂 Birthday', 'Hope your day is cake-filled!')" class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-blue-600 transition">🎂 Birthday</button>
-                <button onclick="setTmp('❤️ Valentine', 'You are my favorite person!')" class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-pink-600 transition">❤️ Valentine</button>
+                <button onclick="setTmp('🎂 Birthday', 'Hope your day is cake-filled!')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-blue-600 transition">🎂 Birthday</button>
+                <button onclick="setTmp('❤️ Valentine', 'You are my favorite person!')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-pink-600 transition">❤️ Valentine</button>
             </div>
-            <input type="text" id="title" placeholder="Greeting Title" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
-            <textarea id="message" placeholder="Your Message..." rows="3" class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500"></textarea>
-            <button id="genBtn" onclick="generateLink()" class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-500 transition">Generate Magic Link</button>
+            <input type="text" id="title" placeholder="Greeting Title"
+                class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500">
+            <textarea id="message" placeholder="Your Message..." rows="3"
+                class="w-full bg-slate-700 p-3 rounded-xl border border-slate-600 outline-none focus:border-blue-500"></textarea>
+            <button id="genBtn" onclick="generateLink()"
+                class="w-full bg-blue-600 py-4 rounded-xl font-bold shadow-lg hover:bg-blue-500 transition">Generate
+                Magic Link</button>
         </div>
         <div id="result" class="hidden mt-6 p-4 bg-black/40 rounded-xl border border-emerald-500/30">
             <p class="text-[10px] text-emerald-400 font-bold mb-2 uppercase">Copy & Share:</p>
-            <div id="shareLink" class="text-xs break-all font-mono text-white mb-3 bg-slate-900 p-3 rounded border border-slate-700"></div>
-            <button onclick="copyToClipboard('shareLink')" class="w-full bg-emerald-600 py-2 rounded-lg text-xs font-bold uppercase">Copy Link</button>
+            <div id="shareLink"
+                class="text-xs break-all font-mono text-white mb-3 bg-slate-900 p-3 rounded border border-slate-700">
+            </div>
+            <button onclick="copyToClipboard('shareLink')"
+                class="w-full bg-emerald-600 py-2 rounded-lg text-xs font-bold uppercase">Copy Link</button>
         </div>
     </div>
 
     <div id="receiver-page" class="hidden max-w-2xl w-full">
         <div class="bg-slate-800 rounded-3xl p-10 text-center relative border border-slate-700 shadow-2xl">
-            <div id="loader" class="hidden absolute inset-0 bg-slate-800/95 flex flex-col items-center justify-center z-10 rounded-3xl">
+            <div id="loader"
+                class="hidden absolute inset-0 bg-slate-800/95 flex flex-col items-center justify-center z-10 rounded-3xl">
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-400 mb-2"></div>
                 <p class="text-xs text-blue-400 font-mono">AI Stylizing...</p>
             </div>
-            
+
             <h1 id="viewTitle" class="text-4xl font-black mb-1 uppercase text-white tracking-tighter"></h1>
             <p id="fromLabel" class="text-blue-400 font-bold tracking-widest text-sm mb-6 uppercase"></p>
-            
+
             <div class="relative group">
                 <p id="viewMsg" class="text-xl italic text-slate-200 leading-relaxed mb-4"></p>
-                <button onclick="copyToClipboard('viewMsg')" class="text-[10px] text-slate-500 hover:text-blue-400 uppercase font-bold tracking-tighter transition">
+                <button onclick="copyToClipboard('viewMsg')"
+                    class="text-[10px] text-slate-500 hover:text-blue-400 uppercase font-bold tracking-tighter transition">
                     📋 Copy this version
                 </button>
             </div>
         </div>
 
         <div class="mt-6 p-6 bg-slate-800/50 rounded-2xl border border-slate-700">
-            <p class="text-center text-[10px] text-slate-500 font-bold uppercase mb-4 tracking-widest">Change Reading Style</p>
+            <p class="text-center text-[10px] text-slate-500 font-bold uppercase mb-4 tracking-widest">Change Reading
+                Style</p>
             <div class="grid grid-cols-3 gap-2">
-                <button onclick="applyStyle('original')" class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-slate-600 transition">Original</button>
-                <button onclick="applyStyle('minion')" class="bg-yellow-600 p-3 rounded-xl text-xs hover:bg-yellow-500 text-black font-bold transition">🍌 Minion</button>
-                <button onclick="applyStyle('gen z')" class="bg-purple-600 p-3 rounded-xl text-xs hover:bg-purple-500 font-bold transition">💀 Gen Z</button>
-                <button onclick="applyStyle('pirate')" class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-amber-700 transition">Pirate</button>
-                <button onclick="applyStyle('royalty')" class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-yellow-700 transition">Royalty</button>
-                <button onclick="applyStyle('gangsta')" class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-zinc-700 transition">Gangsta</button>
+                <button onclick="applyStyle('original')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-slate-600 transition">Original</button>
+                <button onclick="applyStyle('minion')"
+                    class="bg-yellow-600 p-3 rounded-xl text-xs hover:bg-yellow-500 text-black font-bold transition">🍌
+                    Minion</button>
+                <button onclick="applyStyle('gen z')"
+                    class="bg-purple-600 p-3 rounded-xl text-xs hover:bg-purple-500 font-bold transition">💀 Gen
+                    Z</button>
+                <button onclick="applyStyle('pirate')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-amber-700 transition">Pirate</button>
+                <button onclick="applyStyle('royalty')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-yellow-700 transition">Royalty</button>
+                <button onclick="applyStyle('gangsta')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-zinc-700 transition">Gangsta</button>
+                <button onclick="applyStyle('fantasy')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-indigo-600 transition">🦄 Fantasy</button>
+                <button onclick="applyStyle('yoga')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-teal-600 transition">🧘 Yoga</button>
+                <button onclick="applyStyle('poetry')"
+                    class="bg-slate-700 p-3 rounded-xl text-xs hover:bg-rose-600 transition">📜 Poetry</button>
             </div>
         </div>
 
         <div class="mt-12 text-center border-t border-slate-700 pt-8">
             <p class="text-slate-400 text-xs mb-4 italic">Want to send a magic message like this?</p>
-            <a href="./" class="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 rounded-2xl font-bold text-white shadow-xl hover:scale-105 transition-all">
+            <a href="./"
+                class="inline-block bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 rounded-2xl font-bold text-white shadow-xl hover:scale-105 transition-all">
                 ✨ Create Your Own Greeting
             </a>
         </div>
@@ -72,7 +102,7 @@
 
     <script>
         // REPLACE WITH YOUR DIRECT HUGGING FACE URL
-        const API_BASE = "https://chaicordero-greetstyle-ai.hf.space"; 
+        const API_BASE = "https://chaicordero-greetstyle-ai.hf.space";
         let originalMsg = "";
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -87,7 +117,7 @@
                 document.getElementById('viewMsg').innerText = data.m || "";
                 originalMsg = data.m;
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            } catch(e) { console.error(e); }
+            } catch (e) { console.error(e); }
         }
 
         function setTmp(t, m) {
@@ -97,10 +127,10 @@
 
         async function generateLink() {
             const btn = document.getElementById('genBtn');
-            const data = { 
-                s: document.getElementById('senderName').value, 
-                t: document.getElementById('title').value, 
-                m: document.getElementById('message').value 
+            const data = {
+                s: document.getElementById('senderName').value,
+                t: document.getElementById('title').value,
+                m: document.getElementById('message').value
             };
             btn.innerText = "⏳ Shortening...";
             const longUrl = window.location.origin + window.location.pathname + "?msg=" + LZString.compressToEncodedURIComponent(JSON.stringify(data));
@@ -122,7 +152,7 @@
             if (style === 'original') { document.getElementById('viewMsg').innerText = originalMsg; return; }
             const loader = document.getElementById('loader');
             loader.classList.remove('hidden');
-            
+
             for (let attempt = 0; attempt < 2; attempt++) {
                 try {
                     const response = await fetch(`${API_BASE}/api/transform`, {
@@ -145,4 +175,5 @@
         }
     </script>
 </body>
+
 </html>
